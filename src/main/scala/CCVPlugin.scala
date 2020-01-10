@@ -55,6 +55,7 @@ ${svals}
       ccv := ccvTask.value
     )
     lazy val ccvTask = Def.task {
+      val path = s"${ccvPath.value}/${ccvConfName.value.toLowerCase}.scala"
       CCV.ObjectBuilder(ccvConfName.value, ccvConfName.value, ccvObjs.value)
     }
   }
