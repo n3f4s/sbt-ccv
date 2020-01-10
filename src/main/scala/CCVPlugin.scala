@@ -24,21 +24,6 @@ package CCV {
 
     def apply(name: String, vars: Seq[ObjectBuilder.Var]) =
       new ObjectBuilder(name, vars).toString
-
-    def apply(path: String, name: String, vars: Seq[ObjectBuilder.Var], logger: Logger) = {
-      val filename = s"${path}/${name.toLowerCase}.scala"
-      logger.info(s"Generating values in class ${name}")
-      logger.info(s"Writting sources to ${filename}")
-      val str_code = new ObjectBuilder(name, vars).toString
-      logger.debug(s"Writting:\n${str_code}")
-      import java.io._
-      val file = new File(filename)
-      val bw = new BufferedWriter(new FileWriter(file, false))
-      bw.write(str_code)
-      bw.flush
-      bw.close
-      logger.info("Everything went well")
-    }
   }
 
   class ObjectBuilder(name: String, vars: Seq[ObjectBuilder.Var]) {
@@ -57,23 +42,13 @@ ${svals}
     object autoImport {
       lazy val ccvObjs = settingKey[Seq[CCV.ObjectBuilder.Var]]("Objects containing the variable to access from code")
       lazy val ccvConfName = settingKey[String]("Name of the object containing the variables")
-      lazy val ccvPath = settingKey[String]("Path where to write the file")
-      lazy val ccv = taskKey[Unit]("Generate the object containing the value to set")
     }
-    // TODO: set defaults
+
     import autoImport._
 
     override lazy val buildSettings = Seq(
       ccvConfName := "Config",
-      ccvPath := s"target/scala-${scalaVersion.value}/src_managed/main/sbt-ccv",
-      //ccvPath := (sourceManaged in Compile).value + "/sbt-ccv",
-      // ccv := ccvTask.value
     )
-
-    // lazy val ccvTask = Def.task {
-    //   val path = (sourceManaged in Compile).value / "sbt-ccv" / s"${ccvConfName.value.toLowerCase}.scala"
-    //   CCV.ObjectBuilder(path, ccvConfName.value, ccvObjs.value, streams.value.log)
-    // }
 
     lazy val ccvFileTask = Def.task {
       val logger = streams.value.log
