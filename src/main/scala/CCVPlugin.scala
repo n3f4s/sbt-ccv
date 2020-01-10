@@ -26,7 +26,8 @@ package CCV {
     def apply(name: String, vars: Seq[ObjectBuilder.Var]) =
       new ObjectBuilder(name, vars).toString
 
-    def apply(filename: String, name: String, vars: Seq[ObjectBuilder.Var]) = {
+    def apply(path: String, name: String, vars: Seq[ObjectBuilder.Var]) = {
+      val filename = s"${path}/${name.toLowerCase}.scala"
       val str_code = new ObjectBuilder(name, vars).toString
       import java.io._
       val file = new File(filename)
@@ -62,8 +63,7 @@ ${svals}
       ccv := ccvTask.value
     )
     lazy val ccvTask = Def.task {
-      val path = s"${ccvPath.value}/${ccvConfName.value.toLowerCase}.scala"
-      CCV.ObjectBuilder(ccvConfName.value, ccvConfName.value, ccvObjs.value)
+      CCV.ObjectBuilder(ccvPath.value, ccvConfName.value, ccvConfName.value, ccvObjs.value)
     }
   }
 }
