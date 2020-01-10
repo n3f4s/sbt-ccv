@@ -1,5 +1,5 @@
 /* TODO
- 3- test the plugin
+ 1- logs
  4- use the plugin
  5- better handling of case class
  */
@@ -10,6 +10,8 @@ import complete.DefaultParsers._
 
 package CCV {
   object ObjectBuilder {
+    private val logger = streams.value.log
+
     import scala.reflect.ClassTag
     case class Var(name: String, vval: Any, vtype: String)
     implicit class Quoted(val s: String) {
