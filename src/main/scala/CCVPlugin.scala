@@ -13,14 +13,19 @@ package CCV {
     private val logger = streams.value.log
 
     import scala.reflect.ClassTag
+
     case class Var(name: String, vval: Any, vtype: String)
+
     implicit class Quoted(val s: String) {
       def q = "\"" + s + "\""
     }
+
     def make_var[T](vname: String, vval: T)(implicit ev: ClassTag[T]): Var =
       Var(vname, vval, ev.toString)
+
     def apply(name: String, vars: Seq[ObjectBuilder.Var]) =
       new ObjectBuilder(name, vars).toString
+
     def apply(filename: String, name: String, vars: Seq[ObjectBuilder.Var]) = {
       val str_code = new ObjectBuilder(name, vars).toString
       import java.io._
