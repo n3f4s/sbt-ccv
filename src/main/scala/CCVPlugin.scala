@@ -1,12 +1,13 @@
 /* TODO
- 1- logs
  4- use the plugin
+ 4- Make the path use scalaVersion
  5- better handling of case class
  */
 
 import sbt.Keys._
 import sbt._
 import complete.DefaultParsers._
+import plugins._
 
 package CCV {
   object ObjectBuilder {
@@ -51,6 +52,8 @@ ${svals}
   }
 
   object CCVPlugin extends AutoPlugin {
+    override def requires = JvmPlugin
+
     object autoImport {
       lazy val ccvObjs = settingKey[Seq[CCV.ObjectBuilder.Var]]("Objects containing the variable to access from code")
       lazy val ccvConfName = settingKey[String]("Name of the object containing the variables")
@@ -59,26 +62,34 @@ ${svals}
     }
     // TODO: set defaults
     import autoImport._
+
     override lazy val buildSettings = Seq(
       ccvConfName := "Config",
-      ccvPath := "target/scala-2.12/src_managed/main/sbt-ccv",
-      ccv := ccvTask.value
+      ccvPath := s"target/scala-${scalaVersion.value}/src_managed/main/sbt-ccv",
+      //ccvPath := (sourceManaged in Compile).value + "/sbt-ccv",
+      // ccv := ccvTask.value
     )
-    lazy val ccvTask = Def.task {
-      CCV.ObjectBuilder(ccvPath.value, ccvConfName.value, ccvObjs.value, streams.value.log)
+
+    // lazy val ccvTask = Def.task {
+    //   val path = (sourceManaged in Compile).value / "sbt-ccv" / s"${ccvConfName.value.toLowerCase}.scala"
+    //   CCV.ObjectBuilder(path, ccvConfName.value, ccvObjs.value, streams.value.log)
+    // }
+
+    lazy val ccvFileTask = Def.task {
+      val logger = streams.value.log
+      val str_code = CCV.ObjectBuilder(ccvConfName.value, ccvObjs.value)
+      val file = (sourceManaged in Compile).value / "sbt-ccv" / s"${ccvConfName.value.toLowerCase}.scala"
+
+      logger.info(s"Generating values in class ${ccvConfName.value}")
+      logger.info(s"Writting sources to ${file.getName}")
+      logger.debug(s"Writting:\n${str_code}")
+
+      IO.write(file, str_code)
+      Seq(file)
     }
+
+    override lazy val projectSettings = Seq(
+      sourceGenerators in Compile += ccvFileTask.taskValue
+    )
   }
 }
-
-// object Test extends App {
-//   import CCV._
-//   import ObjectBuilder.Quoted
-//   case class TCC(foo: Int, bar: String) {
-//     override def toString = s"TCC($foo, $bar)"
-//   }
-//   println(new ObjectBuilder("Test", Seq(
-//                               ObjectBuilder.make_var("foo", 1),
-//                               ObjectBuilder.make_var("bar", "foo".q),
-//                               ObjectBuilder.make_var("baz", TCC(10, "test".q)),
-//                             )).toString)
-// }
