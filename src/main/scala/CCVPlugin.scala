@@ -10,8 +10,6 @@ import complete.DefaultParsers._
 
 package CCV {
   object ObjectBuilder {
-    private val logger = streams.value.log
-
     import scala.reflect.ClassTag
 
     case class Var(name: String, vval: Any, vtype: String)
@@ -26,15 +24,19 @@ package CCV {
     def apply(name: String, vars: Seq[ObjectBuilder.Var]) =
       new ObjectBuilder(name, vars).toString
 
-    def apply(path: String, name: String, vars: Seq[ObjectBuilder.Var]) = {
+    def apply(path: String, name: String, vars: Seq[ObjectBuilder.Var], logger: Logger) = {
       val filename = s"${path}/${name.toLowerCase}.scala"
+      logger.info(s"Generating values in class ${name}")
+      logger.info(s"Writting sources to ${filename}")
       val str_code = new ObjectBuilder(name, vars).toString
+      logger.debug(s"Writting:\n${str_code}")
       import java.io._
       val file = new File(filename)
       val bw = new BufferedWriter(new FileWriter(file, false))
       bw.write(str_code)
       bw.flush
       bw.close
+      logger.info("Everything went well")
     }
   }
 
@@ -63,7 +65,7 @@ ${svals}
       ccv := ccvTask.value
     )
     lazy val ccvTask = Def.task {
-      CCV.ObjectBuilder(ccvPath.value, ccvConfName.value, ccvConfName.value, ccvObjs.value)
+      CCV.ObjectBuilder(ccvPath.value, ccvConfName.value, ccvObjs.value, streams.value.log)
     }
   }
 }
