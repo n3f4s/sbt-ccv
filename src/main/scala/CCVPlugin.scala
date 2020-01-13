@@ -28,7 +28,8 @@ package CCV {
 
   class ObjectBuilder(name: String, vars: Seq[ObjectBuilder.Var]) {
     override def toString = {
-      val svals = vars map{ case ObjectBuilder.Var(vn, vv, vt) => s"\tval ${vn}: ${vt} = ${vv}" } mkString "\n"
+      // val svals = vars map{ case ObjectBuilder.Var(vn, vv, vt) => s"\tval ${vn}: ${vt} = ${vv}" } mkString "\n"
+      val svals = vars map{ case ObjectBuilder.Var(vn, vv, vt) => s"\tval ${vn} = ${vv}" } mkString "\n"
       s"""object ${name} {
 ${svals}
 }
